@@ -82,11 +82,17 @@ iverilog -g2012 \
 echo "==> Compilation successful: sim_vvp/shakti_soc.vvp created."
 
 # 5. Place boot.mem and memory initialization files where VVP runs
-BOOT_MEM=$(find . -name "boot.mem" 2>/dev/null | head -n 1)
+BOOT_MEM=$(find boot-code -name "boot.mem" 2>/dev/null | head -n 1)
+if [ -z "${BOOT_MEM}" ]; then
+    BOOT_MEM=$(find . -name "boot.mem" 2>/dev/null | head -n 1)
+fi
+
 if [ -n "${BOOT_MEM}" ]; then
     echo "--> Found boot memory hex: ${BOOT_MEM}"
-    cp -f "${BOOT_MEM}" boot.mem
-    cp -f "${BOOT_MEM}" sim_vvp/boot.mem
+    if [ "${BOOT_MEM}" != "./boot.mem" ] && [ "${BOOT_MEM}" != "boot.mem" ]; then
+        cp -f "${BOOT_MEM}" boot.mem 2>/dev/null || true
+    fi
+    cp -f "${BOOT_MEM}" sim_vvp/boot.mem 2>/dev/null || true
 fi
 
 # Ensure RAM files exist so $readmemh succeeds
