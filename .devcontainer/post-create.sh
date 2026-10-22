@@ -71,6 +71,12 @@ if [ -d "${WORKSPACE_DIR}/scripts" ]; then
     chmod +x ${WORKSPACE_DIR}/scripts/*.sh 2>/dev/null || true
 fi
 
+# 7. Install Spike & PK in background/gracefully
+if [ -f "${WORKSPACE_DIR}/scripts/install_spike.sh" ]; then
+    echo "--> Installing Spike and PK..."
+    bash "${WORKSPACE_DIR}/scripts/install_spike.sh" || echo "Warning: Spike build had an issue, you can run ./scripts/install_spike.sh manually."
+fi
+
 echo "=========================================================="
 echo " Codespace Setup Complete!"
 echo " You can now edit any source files under:"

@@ -34,6 +34,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-setuptools \
     libboost-regex-dev \
     libboost-system-dev \
+    libboost-all-dev \
     gcc-riscv64-unknown-elf \
     binutils-riscv64-unknown-elf \
     picolibc-riscv64-unknown-elf \
@@ -57,21 +58,7 @@ RUN wget -q https://github.com/B-Lang-org/bsc/releases/download/2024.07/bsc-2024
     ln -sf /usr/local/lib/Libraries /usr/local/lib/Prelude && \
     mkdir -p /usr/local/lib/Libraries/BlueNoC
 
-# 4. Install Spike (RISC-V ISA Simulator)
-RUN git clone --depth 1 https://github.com/riscv-software-src/riscv-isa-sim.git /tmp/spike && \
-    mkdir -p /tmp/spike/build && cd /tmp/spike/build && \
-    ../configure --prefix=/usr/local && \
-    make -j$(nproc) && make install && \
-    rm -rf /tmp/spike
-
-# 5. Install RISC-V Proxy Kernel (pk for RV32)
-RUN git clone --depth 1 https://github.com/riscv-software-src/riscv-pk.git /tmp/pk && \
-    mkdir -p /tmp/pk/build && cd /tmp/pk/build && \
-    ../configure --prefix=/usr/local --host=riscv64-unknown-elf --with-arch=rv32i_zicsr_zifencei --with-abi=ilp32 && \
-    make -j$(nproc) && make install && \
-    rm -rf /tmp/pk
-
-# 6. Install Python Serial tools & create miniterm wrapper
+# 4. Install Python Serial tools & create miniterm wrapper
 RUN pip3 install --no-cache-dir pyserial && \
     echo '#!/usr/bin/env bash\nexec python3 -m serial.tools.miniterm "$@"' > /usr/local/bin/miniterm && \
     chmod +x /usr/local/bin/miniterm
