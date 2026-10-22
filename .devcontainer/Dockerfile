@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     curl \
     wget \
+    vim \
     tar \
     unzip \
     ca-certificates \
