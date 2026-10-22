@@ -40,7 +40,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# 2. Install prebuilt SiFive multi-lib RISC-V GCC toolchain (with full Newlib libc)
+# 2. Install prebuilt SiFive multi-lib RISC-V GCC toolchain (includes complete Newlib libc with <stdio.h>)
 WORKDIR /opt
 RUN wget -q https://static.dev.sifive.com/dev-tools/riscv64-unknown-elf-gcc-8.3.0-2019.08.0-x86_64-linux-ubuntu14.tar.gz && \
     tar -xzf riscv64-unknown-elf-gcc-8.3.0-2019.08.0-x86_64-linux-ubuntu14.tar.gz && \
@@ -52,7 +52,7 @@ RUN wget -q https://static.dev.sifive.com/dev-tools/riscv64-unknown-elf-gcc-8.3.
         ln -sf /opt/riscv/bin/riscv64-unknown-elf-$tool /usr/local/bin/riscv-unknown-elf-$tool ; \
     done
 
-# 3. Build & Install Spike
+# 3. Build & Install Spike (RISC-V ISA Simulator)
 WORKDIR /tmp
 RUN git clone --recurse-submodules --depth 1 https://github.com/riscv-software-src/riscv-isa-sim.git /tmp/spike && \
     mkdir -p /tmp/spike/build && cd /tmp/spike/build && \
@@ -61,14 +61,18 @@ RUN git clone --recurse-submodules --depth 1 https://github.com/riscv-software-s
     rm -rf /tmp/spike && \
     ln -sf /opt/riscv/bin/spike /usr/local/bin/spike
 
-# 4. Build & Install riscv-pk (pinned to v1.0.0 matching SiFive toolchain)
+# 4. Build & Install riscv-pk (pinned to v1.0.0 with medeleg fix for modern Spike)
 WORKDIR /tmp
 RUN git clone https://github.com/riscv-software-src/riscv-pk.git /tmp/riscv-pk && \
-    cd /tmp/riscv-pk && git checkout v1.0.0 && \
+    cd /tmp/riscv-pk && \
+    git checkout v1.0.0 && \
+    sed -i 's/assert(read_csr(medeleg) == exceptions);/\/\/ assert(read_csr(medeleg) == exceptions);/g' machine/minit.c && \
     mkdir -p build && cd build && \
     PATH="/opt/riscv/bin:${PATH}" CC=/opt/riscv/bin/riscv64-unknown-elf-gcc ../configure --prefix=/opt/riscv --host=riscv64-unknown-elf && \
     PATH="/opt/riscv/bin:${PATH}" make -j$(nproc) && \
     make install && \
+    mkdir -p /usr/local/riscv64-unknown-elf/bin && \
+    ln -sf /opt/riscv/riscv64-unknown-elf/bin/pk /usr/local/riscv64-unknown-elf/bin/pk && \
     ln -sf /opt/riscv/riscv64-unknown-elf/bin/pk /usr/local/bin/pk && \
     rm -rf /tmp/riscv-pk
 

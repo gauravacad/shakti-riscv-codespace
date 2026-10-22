@@ -28,7 +28,8 @@ if [ -f "Makefile" ]; then
 fi
 
 if [ -f "boot-code/Makefile" ]; then
-    sed -i 's/-march=rv$(XLEN)imac/-march=rv$(XLEN)imac -mabi=ilp32 --specs=picolibc.specs/g' boot-code/Makefile
+    sed -i 's/--specs=picolibc.specs//g' boot-code/Makefile
+    sed -i 's/-march=rv$(XLEN)imac/-march=rv$(XLEN)imac -mabi=ilp32/g' boot-code/Makefile
 fi
 
 # Determine config file (core_config.inc for sp2020 or soc_config.inc for base-sim)

@@ -41,6 +41,10 @@ if [ ! -d "${WORKSPACE_DIR}/sp2020" ]; then
         ln -s "${WORKSPACE_DIR}/sp2020/e32-a35" "${WORKSPACE_DIR}/e32-a35"
         echo "--> Linked e32-a35 directly to workspace root for convenient access."
     fi
+    if [ -f "${WORKSPACE_DIR}/sp2020/e32-a35/Makefile" ]; then
+        sed -i 's/-K40000M/-K4000M/g' "${WORKSPACE_DIR}/sp2020/e32-a35/Makefile" 2>/dev/null || true
+        sed -i 's|-verilog-filter [^ ]*||g' "${WORKSPACE_DIR}/sp2020/e32-a35/Makefile" 2>/dev/null || true
+    fi
 else
     echo "--> sp2020 already present, skipping clone."
 fi
