@@ -21,15 +21,31 @@ fi
 
 cd "${DESIGN_DIR}"
 
+# 0. Automatically apply Makefile and Boot-Code fixes
+if [ -f "Makefile" ]; then
+    sed -i 's/-K40000M/-K4000M/g' Makefile
+    sed -i 's|-verilog-filter [^ ]*||g' Makefile
+fi
+
+if [ -f "boot-code/Makefile" ]; then
+    sed -i 's/-march=rv$(XLEN)imac/-march=rv$(XLEN)imac -mabi=ilp32/g' boot-code/Makefile
+fi
+
+# Determine config file (core_config.inc for sp2020 or soc_config.inc for base-sim)
+CFG="core_config.inc"
+if [ ! -f "${CFG}" ] && [ -f "soc_config.inc" ]; then
+    CFG="soc_config.inc"
+fi
+
 # 1. Ensure Verilog files are generated
 if [ ! -d "verilog" ] || [ -z "$(ls -A verilog/*.v 2>/dev/null)" ]; then
-    echo "==> Generating Verilog files from Bluespec..."
-    make generate_verilog || make CONFIG=soc_config.inc generate_verilog
+    echo "==> Generating Verilog files from Bluespec (CONFIG=${CFG})..."
+    make generate_verilog CONFIG="${CFG}" || make generate_verilog
 fi
 
 # 2. Ensure Boot ROM files are generated
 echo "==> Ensuring boot code (with Shakti logo) is compiled..."
-make generate_boot_files || make CONFIG=soc_config.inc generate_boot_files
+make generate_boot_files CONFIG="${CFG}" || make generate_boot_files
 
 # 3. Locate Bluespec Verilog library primitives
 BSV_VERILOG_DIR="/usr/local/lib/Verilog"
