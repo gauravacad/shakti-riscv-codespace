@@ -32,6 +32,11 @@ if [ -f "boot-code/Makefile" ]; then
     sed -i 's/-march=rv$(XLEN)imac/-march=rv$(XLEN)imac -mabi=ilp32/g' boot-code/Makefile
 fi
 
+# Ensure multiplier.v model is present in common_verilog
+if [ -d "common_verilog" ] && [ -f "${TB_DIR}/multiplier.v" ]; then
+    cp -f "${TB_DIR}/multiplier.v" common_verilog/multiplier.v
+fi
+
 # Determine config file (core_config.inc for sp2020 or soc_config.inc for base-sim)
 CFG="core_config.inc"
 if [ ! -f "${CFG}" ] && [ -f "soc_config.inc" ]; then
@@ -69,6 +74,7 @@ done
 iverilog -g2012 \
     -o sim_vvp/shakti_soc.vvp \
     ${V_FLAGS} \
+    "${TB_DIR}/multiplier.v" \
     "${TB_DIR}/uart_rx_monitor.v" \
     "${TB_DIR}/tb_soc_vvp.v" \
     verilog/*.v
