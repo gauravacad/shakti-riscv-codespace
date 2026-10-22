@@ -80,10 +80,23 @@ iverilog -g2012 \
     verilog/*.v
 
 echo "==> Compilation successful: sim_vvp/shakti_soc.vvp created."
+
+# 5. Place boot.mem and memory initialization files where VVP runs
+BOOT_MEM=$(find . -name "boot.mem" 2>/dev/null | head -n 1)
+if [ -n "${BOOT_MEM}" ]; then
+    echo "--> Found boot memory hex: ${BOOT_MEM}"
+    cp -f "${BOOT_MEM}" boot.mem
+    cp -f "${BOOT_MEM}" sim_vvp/boot.mem
+fi
+
+# Ensure RAM files exist so $readmemh succeeds
+touch code.mem code1.mem
+touch sim_vvp/code.mem sim_vvp/code1.mem
+
 echo ""
 echo "=========================================================="
 echo " Executing Simulation with VVP (Watching UART for Logo):"
 echo "=========================================================="
 
-# 5. Run simulation strictly on vvp
+# 6. Run simulation strictly on vvp
 vvp sim_vvp/shakti_soc.vvp
