@@ -1,0 +1,20 @@
+# OS / VS Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+.DS_Store
+Thumbs.db
+
+# Build artifacts that might be generated in testing
+*.bo
+*.ba
+*.so
+*.o
+*.out
+*.log
+*.vcd
+
+# Shakti generated directories (keep source, ignore heavy generated outputs)
+shakti-e-class/base-sim/verilog/
+shakti-e-class/base-sim/bsv_build/
