@@ -101,3 +101,32 @@ The container automatically applies the following fixes upon creation:
 2. **Obsolete Filter:** Stripped `-verilog-filter` from the Bluespec compile line.
 3. **Library Paths:** Configured `/usr/local/lib/Prelude` and `/usr/local/lib/Libraries/BlueNoC` for modern BSC 2024.07 compatibility.
 4. **Toolchain Symlinks:** Linked 64-bit multi-lib RISC-V GCC to `riscv32-unknown-elf-*` and generic `riscv-unknown-elf-*`.
+
+# 1. Download and install prebuilt SiFive Toolchain into /opt/riscv
+cd /tmp
+wget -q https://static.dev.sifive.com/dev-tools/riscv64-unknown-elf-gcc-8.3.0-2019.08.0-x86_64-linux-ubuntu14.tar.gz
+sudo rm -rf /opt/riscv
+sudo tar -xzf riscv64-unknown-elf-gcc-8.3.0-2019.08.0-x86_64-linux-ubuntu14.tar.gz -C /opt
+sudo mv /opt/riscv64-unknown-elf-gcc-8.3.0-2019.08.0-x86_64-linux-ubuntu14 /opt/riscv
+rm -f riscv64-unknown-elf-gcc-8.3.0-2019.08.0-x86_64-linux-ubuntu14.tar.gz
+
+# 2. Symlink to /usr/local/bin (so riscv32-, riscv64-, and riscv- all work)
+for tool in gcc g++ ar as ld nm objcopy objdump ranlib size strings strip; do
+    sudo ln -sf /opt/riscv/bin/riscv64-unknown-elf-$tool /usr/local/bin/riscv64-unknown-elf-$tool
+    sudo ln -sf /opt/riscv/bin/riscv64-unknown-elf-$tool /usr/local/bin/riscv32-unknown-elf-$tool
+    sudo ln -sf /opt/riscv/bin/riscv64-unknown-elf-$tool /usr/local/bin/riscv-unknown-elf-$tool
+done
+
+# 3. Build pk pinned to v1.0.0 (builds cleanly in 15 seconds!)
+cd /tmp
+sudo rm -rf riscv-pk
+git clone https://github.com/riscv-software-src/riscv-pk.git
+cd riscv-pk
+git checkout v1.0.0
+mkdir -p build && cd build
+PATH="/opt/riscv/bin:$PATH" CC=/opt/riscv/bin/riscv64-unknown-elf-gcc ../configure --prefix=/opt/riscv --host=riscv64-unknown-elf
+PATH="/opt/riscv/bin:$PATH" make -j$(nproc)
+sudo make install
+sudo ln -sf /opt/riscv/riscv64-unknown-elf/bin/pk /usr/local/bin/pk
+sudo ln -sf /opt/riscv/riscv64-unknown-elf/bin/pk /usr/local/bin/pk32 2>/dev/null || true
+cd /tmp && sudo rm -rf riscv-pk
