@@ -57,12 +57,18 @@ fi
 # 4. Compile strictly with iverilog
 echo "==> Compiling SoC Verilog with iverilog..."
 mkdir -p sim_vvp
+
+# Find all project directories containing .v files (common_verilog, devices, etc.)
+V_FLAGS="-I ${BSV_VERILOG_DIR} -y ${BSV_VERILOG_DIR} -I verilog -y verilog"
+for vdir in common_verilog common_verilog/* devices devices/* fabrics fabrics/*; do
+    if [ -d "$vdir" ]; then
+        V_FLAGS="${V_FLAGS} -I ${vdir} -y ${vdir}"
+    fi
+done
+
 iverilog -g2012 \
     -o sim_vvp/shakti_soc.vvp \
-    -I "${BSV_VERILOG_DIR}" \
-    -I verilog \
-    -y "${BSV_VERILOG_DIR}" \
-    -y verilog \
+    ${V_FLAGS} \
     "${TB_DIR}/uart_rx_monitor.v" \
     "${TB_DIR}/tb_soc_vvp.v" \
     verilog/*.v
