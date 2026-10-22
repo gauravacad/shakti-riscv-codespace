@@ -1,15 +1,12 @@
 `timescale 1ns/1ps
 
 module uart_rx_monitor #(
-    parameter CLK_FREQ = 50_000_000,
-    parameter BAUD     = 115200
+    parameter CLKS_PER_BIT = 1312
 )(
     input wire clk,
     input wire rst_n,
     input wire rx
 );
-    localparam CLKS_PER_BIT = CLK_FREQ / BAUD;
-
     reg [3:0]  bit_idx;
     reg [7:0]  rx_byte;
     reg [31:0] clk_cnt;
@@ -35,7 +32,7 @@ module uart_rx_monitor #(
                         state <= START;
                 end
                 START: begin
-                    if (clk_cnt == (CLKS_PER_BIT / 2)) begin
+                    if (clk_cnt >= (CLKS_PER_BIT / 2)) begin
                         if (rx == 1'b0) begin
                             clk_cnt <= 0;
                             state   <= DATA;
