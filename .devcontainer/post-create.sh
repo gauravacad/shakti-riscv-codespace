@@ -33,7 +33,19 @@ else
     echo "--> shakti-e-class already present, skipping clone."
 fi
 
-# 4. Apply Base-Sim Makefile Fixes
+# 4. Clone Shakti SP2020 (Swadeshi Microprocessor Challenge - includes e32-a35 SoC Pinaka)
+if [ ! -d "${WORKSPACE_DIR}/sp2020" ]; then
+    echo "--> Cloning sp2020 (containing e32-a35 SoC) from https://gitlab.com/shaktiproject/sp2020.git..."
+    git clone https://gitlab.com/shaktiproject/sp2020.git "${WORKSPACE_DIR}/sp2020"
+    if [ -d "${WORKSPACE_DIR}/sp2020/e32-a35" ] && [ ! -e "${WORKSPACE_DIR}/e32-a35" ]; then
+        ln -s "${WORKSPACE_DIR}/sp2020/e32-a35" "${WORKSPACE_DIR}/e32-a35"
+        echo "--> Linked e32-a35 directly to workspace root for convenient access."
+    fi
+else
+    echo "--> sp2020 already present, skipping clone."
+fi
+
+# 5. Apply Base-Sim Makefile Fixes
 if [ -d "${WORKSPACE_DIR}/shakti-e-class/base-sim" ]; then
     echo "--> Applying Makefile bugfixes in shakti-e-class/base-sim/Makefile..."
     cd "${WORKSPACE_DIR}/shakti-e-class/base-sim"
@@ -54,7 +66,7 @@ if [ -d "${WORKSPACE_DIR}/shakti-e-class/base-sim" ]; then
     cd "${WORKSPACE_DIR}"
 fi
 
-# 5. Make helper scripts executable
+# 6. Make helper scripts executable
 if [ -d "${WORKSPACE_DIR}/scripts" ]; then
     chmod +x ${WORKSPACE_DIR}/scripts/*.sh 2>/dev/null || true
 fi
@@ -62,8 +74,9 @@ fi
 echo "=========================================================="
 echo " Codespace Setup Complete!"
 echo " You can now edit any source files under:"
-echo "   - shakti-e-class/"
-echo "   - shakti-sdk/"
+echo "   - shakti-e-class/    (Core BSV source and SoC simulations)"
+echo "   - shakti-sdk/        (Baremetal SDK and software drivers)"
+echo "   - sp2020/e32-a35/    (Pinaka SoC FPGA board files, OpenOCD & bitstreams)"
 echo ""
 echo " To generate Verilog: run './scripts/generate_verilog.sh'"
 echo " or cd shakti-e-class/base-sim && make CONFIG=soc_config.inc generate_verilog"

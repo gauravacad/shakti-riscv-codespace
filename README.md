@@ -14,10 +14,12 @@ The container comes pre-configured with:
   - `iverilog` (Icarus Verilog)
   - `verilator`
 - **Bluespec Compiler:** BSC 2024.07 (`BLUESPECDIR=/usr/local/lib`, with `Prelude` symlinks and `BlueNoC` path fixes).
+- **Hardware Debug & Utility:** `openocd`, `gdb-multiarch`, `gtkwave`.
 - **Python EDA tools:** `pyserial`, `miniterm`.
 - **Shakti Repositories (Editable in Workspace):**
   - `shakti-e-class`: [https://github.com/anmolsahoo25/shakti-e-class](https://github.com/anmolsahoo25/shakti-e-class)
   - `shakti-sdk`: [https://gitlab.com/shaktiproject/software/shakti-sdk.git](https://gitlab.com/shaktiproject/software/shakti-sdk.git)
+  - `sp2020` / `e32-a35` (Pinaka SoC for Arty A7-35T): [https://gitlab.com/shaktiproject/sp2020/-/tree/master/e32-a35](https://gitlab.com/shaktiproject/sp2020/-/tree/master/e32-a35)
 
 ---
 
@@ -77,12 +79,17 @@ make CONFIG=soc_config.inc generate_verilog
 ```
 The generated Verilog files will appear in `shakti-e-class/base-sim/verilog/`.
 
-### 3. Editing Code
-All files under `shakti-e-class/` and `shakti-sdk/` are directly mounted in the workspace. You can edit any `.bsv`, `.v`, or `.c` files directly in VS Code, commit your changes, and push them to your git remote:
+### 3. Editing Code & Working with E32-A35 (Pinaka SoC)
+All files under `shakti-e-class/`, `shakti-sdk/`, and `sp2020/e32-a35/` (also symlinked as `./e32-a35` in the root) are directly mounted in the workspace:
+- `shakti-e-class/`: Bluespec BSV source code, base simulation environment, and SoC generation.
+- `shakti-sdk/`: Baremetal firmware, drivers, and libraries.
+- `sp2020/e32-a35/`: Arty A7-35T board files, OpenOCD debug configuration (`ftdi.cfg`), board bitstreams, and sample applications.
+
+You can edit any `.bsv`, `.v`, or `.c` files directly in VS Code, commit your changes, and push them to your git remote:
 ```bash
 git status
 git add .
-git commit -m "Updated Shakti core modifications"
+git commit -m "Updated Shakti core and e32-a35 modifications"
 git push
 ```
 
