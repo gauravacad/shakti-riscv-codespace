@@ -5,8 +5,11 @@ echo "==> Installing Spike and PK..."
 
 # 1. Compile Spike with recursive submodules (softfloat, etc.)
 if ! command -v spike &>/dev/null; then
-    echo "--> Cloning and compiling Spike (riscv-isa-sim)..."
+    echo "--> Stopping previous build processes if any..."
+    sudo pkill -9 -f "spike/build" 2>/dev/null || true
+    sleep 1
     sudo rm -rf /tmp/spike
+    echo "--> Cloning and compiling Spike (riscv-isa-sim)..."
     git clone --recurse-submodules --depth 1 https://github.com/riscv-software-src/riscv-isa-sim.git /tmp/spike
     mkdir -p /tmp/spike/build && cd /tmp/spike/build
     ../configure --prefix=/usr/local
