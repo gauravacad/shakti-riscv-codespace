@@ -20,22 +20,29 @@ Boots an authentic **IIT Madras Shakti E-Class (RV32IAC)** core in Icarus Verilo
 
 ---
 
-### Option 2: Pure Complete Shakti SP2020 Simulation (`script_2020_fix`)
-Runs the authentic, unmodified **IIT Madras Pinaka SoC (`sp2020/e32-a35`)** with full Bluespec compilation, AXI4 bus, caches, and calibrated 19,200 Baud UART monitor:
+### Option 2: Accelerated Pure SP2020 Simulation (`baud_fix` — 81.5x Faster!)
+Runs the pure **IIT Madras Pinaka SoC (`sp2020/e32-a35`)** with full Bluespec core and AXI bus, but uses the simulation baud trick (`divisor = 2`, $32\text{ cycles/bit}$ instead of $2,608$):
+
+```bash
+chmod +x ./baud_fix/run_baud_fix.sh
+./baud_fix/run_baud_fix.sh
+```
+- **Execution Speed:** Text streams out in 3 to 5 seconds (**81.5x faster** than physical 19,200 baud).
+- **Core RTL Integrity:** The Shakti processor core, caches, and interconnect are 100% pure and untouched.
+
+---
+
+### Option 3: Real-Time Physical Baud SP2020 Simulation (`script_2020_fix`)
+Runs the pure Pinaka SoC at physical real-time 19,200 Baud ($2,608\text{ clocks/bit}$):
 
 ```bash
 chmod +x ./script_2020_fix/run_sp2020.sh
 ./script_2020_fix/run_sp2020.sh
 ```
 
-**Key Features:**
-- **Exact IIT Madras Architecture:** Compiles pure Bluespec BSV to `mkSoc.v` with genuine Pinaka SoC interconnect.
-- **Calibrated UART Timing:** Monitor accurately samples 19,200 Baud at 50 MHz (`CLKS_PER_BIT = 2608`), displaying the authentic boot output cleanly without garbage characters.
-- **Dedicated Folder:** Isolated under `script_2020_fix/` so both the fast trimmed version and the complete `sp2020` work simultaneously.
-
 ---
 
-### Option 3: Spike RISC-V ISA Simulator
+### Option 4: Spike RISC-V ISA Simulator
 Run your RISC-V ELF directly in the Spike simulator:
 
 ```bash
