@@ -38,10 +38,11 @@ if [ -f "boot-code/Makefile" ]; then
     sed -i 's/-march=rv$(XLEN)imac/-march=rv$(XLEN)imac -mabi=ilp32/g' boot-code/Makefile
 fi
 
-# 3. Ensure pipelined multiplier model is present
+# 3. Ensure pipelined multiplier model and guide are present
 if [ -d "common_verilog" ]; then
     cp -f "${SCRIPT_DIR}/multiplier.v" common_verilog/multiplier.v
 fi
+cp -f "${SCRIPT_DIR}/README.md" README_SIMULATION_GUIDE.md 2>/dev/null || true
 
 # 4. Generate Verilog from Bluespec BSV if not yet present
 CFG="core_config.inc"
