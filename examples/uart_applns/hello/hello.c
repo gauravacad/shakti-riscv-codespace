@@ -1,68 +1,38 @@
+/***************************************************************************
+* Project           		:  shakti devt board
+* Name of the file	     	:  hello.c
+* Brief Description of file     :  Does the printing of hello with the help of uart communication protocol.
+* Name of Author    	        :  Sathya Narayanan N
+* Email ID                      :  sathya281@gmail.com
+
+ Copyright (C) 2019  IIT Madras. All rights reserved.
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+***************************************************************************/
 /**
- * Dual-Target SHAKTI UART Application: hello.c
- * - Compatible with SPIKE Simulator (via HTIF tohost)
- * - Compatible with SHAKTI Hardware / Icarus Verilog (via UART0 MMIO at 0x00011300)
+@file hello.c
+@brief Prints "Hello world !" in the uart terminal.
+*/
+
+#include "uart.h"
+
+/** @fn void main()
+ * @brief prints hello world
  */
-
-#include <stdint.h>
-
-// ==============================================================================
-// 1. Spike Simulator HTIF Interface
-// ==============================================================================
-volatile uint64_t tohost __attribute__((section(".tohost"))) = 0;
-volatile uint64_t fromhost __attribute__((section(".tohost"))) = 0;
-
-void spike_putc(char c) {
-    uint64_t cmd = ((uint64_t)1 << 56) | ((uint64_t)1 << 48) | (uint8_t)c;
-    while (tohost != 0);
-    tohost = cmd;
-}
-
-void spike_exit(int code) {
-    tohost = (code << 1) | 1;
-    while (1);
-}
-
-// ==============================================================================
-// 2. Dual-Channel Output Router
-// ==============================================================================
-void shakti_print(const char *str) {
-    while (*str) {
-        if (*str == '\n') {
-            spike_putc('\r');
-        }
-        spike_putc(*str);
-        str++;
-    }
-}
-
-// ==============================================================================
-// 3. Main Application
-// ==============================================================================
-int main(void) {
-    shakti_print("\n");
-    shakti_print("========================================================\n");
-    shakti_print("       HELLO WORLD RUNNING ON SPIKE SIMULATOR!          \n");
-    shakti_print("========================================================\n");
-    shakti_print(" Binary File  : hello.shakti (RV32IMAC ELF)\n");
-    shakti_print(" Architecture : SHAKTI E-Class / C-Class compatible\n");
-    shakti_print(" Environment  : Spike RISC-V Golden Model Simulator\n");
-    shakti_print(" Status       : Execution Successful (Zero Errors)!\n");
-    shakti_print("========================================================\n\n");
-
-    return 0;
-}
-
-// ==============================================================================
-// 4. Baremetal Reset Entry Point (_start)
-// ==============================================================================
-__attribute__((section(".text.init"))) void _start(void) {
-    // Initialize Stack Pointer in RAM
-    __asm__ volatile ("li sp, 0x80020000");
-
-    // Call main user program
-    main();
-
-    // Clean exit for simulator
-    spike_exit(0);
+void main()
+{
+	printf ("Hello World !\n");
+	while(1);
 }
