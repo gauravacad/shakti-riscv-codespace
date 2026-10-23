@@ -1,0 +1,225 @@
+
+--- Page 38 ---
+38 ===
+5.5 Running application in Standalone mode
+Until now, we have been running applications in Debug mode. We need a Host PC to
+build and run the application every time. In standalone mode, on reset, application
+starts running. The application is no longer downloaded from the PC through a debugger
+and executed. Instead, it is stored in the ﬂash memory. When the system starts, the
+boot loader loads the application from the ﬂash memory to the physical memory (RAM).
+Then the control transfers to the application residing in RAM. This mode of running the
+application is usually used in standalone systems.
+5.5.1 Steps to generate standalone user application
+The make upload command is used to build and upload the application to the ﬂash
+automatically. The SHAKTI-SDK has auploader tool that is used to load a content (such
+as ELF) to ﬂash, after building the image.
+$ cd shakti-sdk
+$ make uploadPROGRAM= <bare metal appln>TARGET=pinaka
+Interpreting above commands:
+• PROGRAM is the new bare metal user application that is created. It is listed by
+typing"make list_applns".
+• TARGET= pinaka, refers to the target SoC.
+Tip: It is always better to run the program in debug mode and once you are conﬁdent
+that there are no bugs, then use the standalone mode.
+37
+
+
+--- Page 39 ---
+39 ===
+Appendices
+ASECTION
+Device pin mapping
+The Device Pin Mapping corresponding to all the three different SoC’ s is listed below.
+The pin mapping is same for all the three SoC’ s.
+A.1 PINAKA, PARASHU and VAJRA
+Sl. No Pin Description Pin mapping Peripheral
+1.1 GPIO0 CK_IO[0] (J4[1],IO - Lower) GPIO
+1.2 GPIO1 CK_IO[1] (J4[3],IO - Lower)
+1.3 GPIO2 CK_IO[2] (J4[5],IO - Lower)
+1.4 GPIO3 CK_IO[3] (J4[7],IO - Lower)
+1.5 GPIO4 CK_IO[4] (J4[9],IO - Lower)
+1.6 GPIO5 CK_IO[5] (J4[11],IO - Lower)
+38
+
+
+--- Page 40 ---
+40 ===
+Sl. No Pin Description Pin mapping Peripheral
+1.7 GPIO6 CK_IO[6] (J4[13],IO - Lower)
+1.8 GPIO7 CK_IO[7] (J4[15],IO - Lower)
+1.9 GPIO8 CK_IO[8] (J2[1],IO - Higher)
+1.10 GPIO9 CK_IO[9] (J2[3],IO - Higher)
+1.11 GPIO10 CK_IO[10] (J2[5],IO - Higher)
+1.12 GPIO11 CK_IO[11] (J2[7],IO - Higher)
+1.13 GPIO12 CK_IO[12] (J2[9],IO - Higher)
+1.14 GPIO13 CK_IO[13] (J2[11],IO - Higher)
+1.15 GPIO14 JB [3] - 2P
+1.16 GPIO15 JB [4] - 2N
+1.17 GPIO16 LD4
+1.18 GPIO17 LD5
+1.19 GPIO18 LD6
+1.20 GPIO19 LD7
+1.21 GPIO20 BTN0
+39
+
+
+--- Page 41 ---
+41 ===
+Sl. No Pin Description Pin mapping Peripheral
+1.22 GPIO21 BTN1
+1.23 GPIO22 BTN2
+1.24 GPIO23 BTN3
+1.25 GPIO24 JD[1] -1P
+1.26 GPIO25 JD[2] -1N
+1.27 GPIO26 JD[3] -2P
+1.28 GPIO27 JD[4] -2N
+1.29 GPIO28 JD[7] -3P
+1.30 GPIO29 JD[8] -3N
+1.31 GPIO30 JD[9] -4P
+1.32 GPIO31 JD[10] -4N
+2.1 ADC P4,N4 CKA0 Single ended ADC
+2.2 ADC P5,N5 CK A1
+2.3 ADC P6,N6 CK A2
+40
+
+
+--- Page 42 ---
+42 ===
+Sl. No Pin Description Pin mapping Peripheral
+2.4 ADC P7,N7 CK A3
+2.5 ADC P15,N15 CK A4
+2.6 ADC P0,N0 CK A5
+3.1 ADC 12P CK A6 Double ended ADC
+3.2 ADC 12N CK A7
+4.1 ADC 13P CK A8 Double ended ADC
+4.2 ADC 13N CK A9
+5.1 ADC 14P CK A10 Double ended ADC
+5.2 ADC 14N CK A11
+6.1 I2C0_SDA JB_P[1] I2C0
+6.2 I2C0_SCL JB_N[1]
+7.1 I2C1_SDA CK_SDA I2C1
+7.2 I2C1_SCL CK_SCL
+8.1 UART0 TX J10 UART
+8.2 UART0 RX J10
+41
+
+
+--- Page 43 ---
+43 ===
+Sl. No Pin Description Pin mapping Peripheral
+9.1 UART1 TX CK_IO[1] (J4[3],IO - Lower)
+9.2 UART1 RX CK_IO[0] (J4[1],IO - Lower)
+10.1 UART2 TX CK_IO[3] (J4[7],IO - Lower)
+10.2 UART2 RX CK_IO[2] (J4[5],IO - Lower)
+11.1 PWM 0 CK_IO[3] (J4[7],IO - Lower) PWM PINS
+11.2 PWM 1 CK_IO[5] (J4[11],IO - Lower)
+11.3 PWM 2 CK_IO[6] (J4[13],IO - Lower)
+11.4 PWM 3 CK_IO[9] (J2[3],IO - Higher)
+11.5 PWM 4 CK_IO[10] (J2[5],IO - Higher)
+11.6 PWM 5 CK_IO[11] (J2[7],IO - Higher)
+12.1 SPI0 CS QSPI_CS SPI0
+12.2 SPI0 SCLK QSPI_DQ[2]
+12.3 SPI0 MISO QSPI_DQ[1]
+12.4 SPI0 MOSI QSPI_DQ[0]
+13.1 SPI1 CS CK_IO[10] (J2[11],IO - Higher) SPI1
+42
+
+
+--- Page 44 ---
+44 ===
+Sl. No Pin Description Pin mapping Peripheral
+13.2 SPI1 SCLK CK_IO[13] (J2[11],IO - Higher)
+13.3 SPI1 MISO CK_IO[12] (J2[11],IO - Higher)
+13.4 SPI1 MOSI CK_IO[11] (J2[11],IO - Higher)
+Table 7: Device pin map
+43
+
+
+--- Page 45 ---
+45 ===
+BSECTION
+Understanding PinMux
+design
+Example B.1
+How to Conﬁgure a PinMux Register?
+• A pair of bit, maps to a device pin. A device can have one or more pins.
+• The bit pair can take values 00, 01, 10. Undeﬁned behavior, for value 11.
+• If all the pair of bit’ s are zero. Then all the IO pins are conﬁgured as GPIO.
+• If bits |7 |6| are set to 10. Then, PWM0 is enabled.
+• If bits |7 | 6| are set to 01. Then, U2TX is enabled.
+PinMux
+Conﬁg Value
+Bit Positions
+31 30 29 28 27 26 25 24 23 22 21 20 19 18 17 16
+00 - - - - - GP13 GP12 GP11
+01 - - - - - S1_CK S1_SO S1_SI
+10 - - - - - - - PWM5
+Table 8: pinmux memory map (upper bytes)
+44
+
+
+--- Page 46 ---
+46 ===
+PinMux
+Conﬁg Value
+Bit Positions
+15 14 13 12 11 10 09 08 07 06 05 04 03 02 01 00
+00 GP10 GP9 GP6 GP5 GP3 GP2 GP1 GP0
+01 S1_CS - - - U2TX U2RX U1TX U1RX
+10 PWM4 PWM3 PWM2 PWM1 PWM0 - - -
+Table 9: pinmux memory map (lower bytes)
+Note:
+1. The above tables are used for conﬁguring GPIO pins as I2C, PWM, SPI & UART .
+2. For example UART needs two pins. Therefore, UART Tx and Rx pins are conﬁgured
+to use the GPIO pins as UART . Similarly, SPI needs 4 pins.
+3. Peripherals not mentioned in this table have their own dedicated pins.
+4. U1 & U2 corresponds to UART1 and UART2.
+5. S1 in the table corresponds to SPI1.
+5. - denotes these bit position are unused.
+45
+
+
+--- Page 47 ---
+47 ===
+CSECTION
+Reach us at!
+Any issues or clariﬁcation in SDK or documentation can be raised under issues in the
+following urlhttps://gitlab.com/shaktiproject/software/shakti-sdk. Before
+raising an issue, please check if there are any similar issues.
+C.1 Steps to create an issue
+• Go to Issues.
+• After clicking on New Issue you will get an option to select a template.
+• Click on choose template, list of available templates will be displayed, Select template
+"Bug".
+• Once the template named ’Bug’ is selected, the description text box is populated
+by the template.
+• Please ﬁll all the ﬁelds in the description text box.
+46
+
+
+--- Page 48 ---
+48 ===
+5SECTION
+Bibliography
+[1] N. Gala, A. Menon, R. Bodduna, G. S. Madhusudan and V . Kamakoti, "SHAKTI
+Processors: An Open-Source Hardware Initiative," 2016 29th International
+Conference on VLSI Design and 2016 15th International Conference on Embedded
+Systems (VLSID), Kolkata, 2016, pp. 7-8.
+http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=7434907&
+isnumber=7434885
+[2] Design of the RISC-V Instruction Set Architecture
+https://riscv.org/specifications/
+[3] SHAKTI Processor Program Open-source Processor Development Ecosystem
+https://shakti.org.in
+[4] Shakti Software Development Kit
+https://gitlab.com/shaktiproject/software/shakti-sdk
+[5] SHAKTI C-class Micro Architecture Design
+https://gitlab.com/shaktiproject/cores/c-class
+[6] SHAKTI E-class Micro Architecture Design
+https://gitlab.com/shaktiproject/cores/e-class
+[7] RISC-V Cores
+https://riscv.org/risc-v-cores/
+[8] RISC V Tool Chain
+https://gitlab.com/shaktiproject/software/riscv-tools
+47
+
