@@ -38,7 +38,7 @@ firmware.bin: firmware.elf
 	$(OBJCOPY) -O binary $< $@
 
 firmware.hex: firmware.bin
-	python3 -c "import struct; data = open('firmware.bin','rb').read(); data += b'\x00'*((4 - len(data)%4)%4); print('\n'.join('%08x' % struct.unpack_from('<I', data, i)[0] for i in range(0, len(data), 4)))" > $@
+	python3 -c "import struct; data = open('firmware.bin','rb').read(); data = data.ljust(4096, b'\x00'); print('\n'.join('%08x' % struct.unpack_from('<I', data, i)[0] for i in range(0, len(data), 4)))" > $@
 
 clean:
 	rm -f *.o *.elf *.bin *.hex *.lst

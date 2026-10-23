@@ -20,14 +20,18 @@ Boots an authentic **IIT Madras Shakti E-Class (RV32IAC)** core in Icarus Verilo
 
 ---
 
-### Option 2: Full SP2020 / Pinaka SoC Simulation (Bluespec + Full mkSoc)
-Runs the complete `sp2020/e32-a35` SoC with AXI interconnect, caches, and peripherals:
+### Option 2: Pure Complete Shakti SP2020 Simulation (`script_2020_fix`)
+Runs the authentic, unmodified **IIT Madras Pinaka SoC (`sp2020/e32-a35`)** with full Bluespec compilation, AXI4 bus, caches, and calibrated 19,200 Baud UART monitor:
 
 ```bash
-./scripts/run_vvp.sh
+chmod +x ./script_2020_fix/run_sp2020.sh
+./script_2020_fix/run_sp2020.sh
 ```
 
-*(You can also override baud sampling at runtime if needed, e.g., `vvp sim_vvp/shakti_soc.vvp +CLKS_PER_BIT=2608`)*
+**Key Features:**
+- **Exact IIT Madras Architecture:** Compiles pure Bluespec BSV to `mkSoc.v` with genuine Pinaka SoC interconnect.
+- **Calibrated UART Timing:** Monitor accurately samples 19,200 Baud at 50 MHz (`CLKS_PER_BIT = 2608`), displaying the authentic boot output cleanly without garbage characters.
+- **Dedicated Folder:** Isolated under `script_2020_fix/` so both the fast trimmed version and the complete `sp2020` work simultaneously.
 
 ---
 
