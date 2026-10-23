@@ -24,26 +24,7 @@ void spike_exit(int code) {
 }
 
 // ==============================================================================
-// 2. Shakti Hardware UART0 MMIO Interface
-// ==============================================================================
-#define UART0_BASE       0x00011300
-#define UART_BAUD_REG    (*(volatile uint16_t *)(UART0_BASE + 0x00))
-#define UART_TX_REG      (*(volatile uint8_t  *)(UART0_BASE + 0x04))
-#define UART_STATUS_REG  (*(volatile uint8_t  *)(UART0_BASE + 0x08))
-#define UART_TX_FULL     0x02
-
-void shakti_uart_init(uint32_t clock_hz, uint32_t baud_rate) {
-    uint16_t divisor = (uint16_t)(clock_hz / (16 * baud_rate));
-    UART_BAUD_REG = divisor;
-}
-
-void shakti_uart_putc(char c) {
-    while (UART_STATUS_REG & UART_TX_FULL);
-    UART_TX_REG = (uint8_t)c;
-}
-
-// ==============================================================================
-// 3. Dual-Channel Output Router
+// 2. Dual-Channel Output Router
 // ==============================================================================
 void shakti_print(const char *str) {
     while (*str) {
@@ -51,11 +32,13 @@ void shakti_print(const char *str) {
             spike_putc('\r');
         }
         spike_putc(*str);
-        // Note: When running on real Shakti hardware/Icarus, shakti_uart_putc is active
         str++;
     }
 }
 
+// ==============================================================================
+// 3. Main Application
+// ==============================================================================
 int main(void) {
     shakti_print("\n");
     shakti_print("========================================================\n");
@@ -67,7 +50,19 @@ int main(void) {
     shakti_print(" Status       : Execution Successful (Zero Errors)!\n");
     shakti_print("========================================================\n\n");
 
-    // Exit simulation cleanly on Spike
-    spike_exit(0);
     return 0;
+}
+
+// ==============================================================================
+// 4. Baremetal Reset Entry Point (_start)
+// ==============================================================================
+__attribute__((section(".text.init"))) void _start(void) {
+    // Initialize Stack Pointer in RAM
+    __asm__ volatile ("li sp, 0x80020000");
+
+    // Call main user program
+    main();
+
+    // Clean exit for simulator
+    spike_exit(0);
 }
