@@ -20,7 +20,6 @@ fi
 
 if [ -z "${SDK_DIR}" ] || [ ! -d "${SDK_DIR}" ]; then
     echo "Error: shakti-sdk directory not found."
-    echo "Please clone it or run inside your Codespace container."
     exit 1
 fi
 
@@ -33,73 +32,93 @@ if [ ! -f "${UART_C}" ]; then
     exit 1
 fi
 
-# Backup original uart.c if not already backed up
-if [ ! -f "${UART_C}.orig" ]; then
+# Restore backup if available so we have a clean slate
+if [ -f "${UART_C}.orig" ]; then
+    cp "${UART_C}.orig" "${UART_C}"
+else
     cp "${UART_C}" "${UART_C}.orig"
-    echo "--> Created backup: ${UART_C}.orig"
 fi
 
-echo "--> Patching ${UART_C} with Spike HTIF tohost support..."
+echo "--> Patching ${UART_C} (both putchar and write_uart_character)..."
 
 python3 - <<EOF
 with open('${UART_C}', 'r') as f:
     code = f.read()
 
-# Check if already patched
-if 'tohost __attribute__' in code:
-    print('--> Already patched with tohost.')
-else:
-    # 1. Add tohost and fromhost globals
-    spike_header = '''
-/* Added for Spike Simulator HTIF Output (Zero VVP impact) */
+# 1. Add tohost and fromhost globals
+spike_header = '''
+/* Added for Spike Simulator HTIF Output (Zero VVP / FPGA impact) */
 volatile unsigned long long tohost __attribute__((section(".tohost"))) = 0;
 volatile unsigned long long fromhost __attribute__((section(".tohost"))) = 0;
 '''
+if 'tohost __attribute__' not in code:
     code = spike_header + code
 
-    # 2. Update write_uart_character to write to tohost as well
-    old_func = '''uint32_t write_uart_character(uart_struct * instance, uint8_t prn_character)
+# 2. Patch putchar(int ch) -- this is what printf() actually calls!
+old_putchar = '''int putchar(int ch)
 {
-	while(instance->status & STS_TX_FULL);
+	while(uart_instance[0]->status & STS_TX_FULL);
 
-	instance->tx_reg = prn_character;
+	uart_instance[0]->tx_reg = ch;
 
 	return 0;
 }'''
 
-    new_func = '''uint32_t write_uart_character(uart_struct * instance, uint8_t prn_character)
+new_putchar = '''int putchar(int ch)
 {
-	/* Spike HTIF Output: write character to tohost */
-	tohost = ((unsigned long long)1 << 56) | ((unsigned long long)1 << 48) | (unsigned char)prn_character;
+	/* Spike HTIF Output: write character to Spike terminal */
+	tohost = ((unsigned long long)1 << 56) | ((unsigned long long)1 << 48) | (unsigned char)ch;
 
 	/* Physical Hardware UART Output (Active for VVP and FPGA) */
+	while(uart_instance[0]->status & STS_TX_FULL);
+	uart_instance[0]->tx_reg = ch;
+
+	return 0;
+}'''
+
+if old_putchar in code:
+    code = code.replace(old_putchar, new_putchar)
+    print('--> Successfully patched putchar() for printf()!')
+else:
+    # Fallback regex
+    import re
+    code = re.sub(
+        r'(int\s+putchar\s*\([^)]*\)\s*\{)(.*?)(\buart_instance\[0\]->tx_reg\s*=\s*ch;)',
+        r'\1\n\t/* Spike HTIF Output */\n\ttohost = ((unsigned long long)1 << 56) | ((unsigned long long)1 << 48) | (unsigned char)ch;\n\2\3',
+        code,
+        flags=re.DOTALL
+    )
+    print('--> Applied regex patch to putchar().')
+
+# 3. Patch write_uart_character as well
+old_write = '''uint32_t write_uart_character(uart_struct * instance, uint8_t prn_character)
+{
 	while(instance->status & STS_TX_FULL);
+
 	instance->tx_reg = prn_character;
 
 	return 0;
 }'''
 
-    if old_func in code:
-        code = code.replace(old_func, new_func)
-        print('--> Successfully updated write_uart_character()!')
-    else:
-        # Fallback replacement if formatting varies
-        import re
-        pattern = r'(uint32_t\s+write_uart_character\s*\([^)]*\)\s*\{)(.*?)(\binstance->tx_reg\s*=\s*prn_character;)'
-        subst = r'\1\n\t/* Spike HTIF Output */\n\ttohost = ((unsigned long long)1 << 56) | ((unsigned long long)1 << 48) | (unsigned char)prn_character;\n\2\3'
-        code = re.sub(pattern, subst, code, flags=re.DOTALL)
-        print('--> Applied regex patch to write_uart_character().')
+new_write = '''uint32_t write_uart_character(uart_struct * instance, uint8_t prn_character)
+{
+	tohost = ((unsigned long long)1 << 56) | ((unsigned long long)1 << 48) | (unsigned char)prn_character;
+	while(instance->status & STS_TX_FULL);
+	instance->tx_reg = prn_character;
+	return 0;
+}'''
 
-    with open('${UART_C}', 'w') as f:
-        f.write(code)
-    print('--> Saved patched ${UART_C} successfully.')
+if old_write in code:
+    code = code.replace(old_write, new_write)
+    print('--> Successfully patched write_uart_character()!')
+
+with open('${UART_C}', 'w') as f:
+    f.write(code)
+print('--> Saved patched ${UART_C} successfully.')
 EOF
 
 echo ""
 echo "=========================================================="
-echo " Patch applied successfully!"
-echo " You can now rebuild and run on Spike in shakti-sdk:"
-echo "   cd ${SDK_DIR}/software/examples/uart_applns/hello"
-echo "   make software PROGRAM=hello TARGET=pinaka"
-echo "   spike --isa=rv32imac ./output/hello.shakti"
+echo " Patch applied successfully to putchar()!"
+echo " Now recompile: make clean && make software PROGRAM=hello TARGET=pinaka"
 echo "=========================================================="
