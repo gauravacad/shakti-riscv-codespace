@@ -5,6 +5,7 @@
 !.vscode/launch.json
 .DS_Store
 Thumbs.db
+~$*
 
 # Build artifacts that might be generated in testing
 *.bo
