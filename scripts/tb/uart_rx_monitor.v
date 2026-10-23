@@ -1,12 +1,22 @@
 `timescale 1ns/1ps
 
 module uart_rx_monitor #(
-    parameter CLKS_PER_BIT = 1312
+    parameter CLKS_PER_BIT = 2608 // 50 MHz clock / 19200 baud = 2604 cycles (16 * 163 = 2608)
 )(
     input wire clk,
     input wire rst_n,
     input wire rx
 );
+    integer clks_param;
+    initial begin
+        clks_param = CLKS_PER_BIT;
+        if ($value$plusargs("CLKS_PER_BIT=%d", clks_param)) begin
+            $display("[UART_MONITOR] Using runtime CLKS_PER_BIT = %0d", clks_param);
+        end else begin
+            $display("[UART_MONITOR] Using default CLKS_PER_BIT = %0d (19200 Baud @ 50MHz)", clks_param);
+        end
+    end
+
     reg [3:0]  bit_idx;
     reg [7:0]  rx_byte;
     reg [31:0] clk_cnt;
@@ -32,7 +42,7 @@ module uart_rx_monitor #(
                         state <= START;
                 end
                 START: begin
-                    if (clk_cnt >= (CLKS_PER_BIT / 2)) begin
+                    if (clk_cnt >= (clks_param / 2)) begin
                         if (rx == 1'b0) begin
                             clk_cnt <= 0;
                             state   <= DATA;
@@ -44,7 +54,7 @@ module uart_rx_monitor #(
                     end
                 end
                 DATA: begin
-                    if (clk_cnt < CLKS_PER_BIT - 1) begin
+                    if (clk_cnt < clks_param - 1) begin
                         clk_cnt <= clk_cnt + 1;
                     end else begin
                         clk_cnt <= 0;
@@ -58,11 +68,18 @@ module uart_rx_monitor #(
                     end
                 end
                 STOP: begin
-                    if (clk_cnt < CLKS_PER_BIT - 1) begin
+                    if (clk_cnt < clks_param - 1) begin
                         clk_cnt <= clk_cnt + 1;
                     end else begin
-                        $write("%c", rx_byte);
-                        $fflush();
+                        // Print printable characters, CR, LF, TAB cleanly
+                        if ((rx_byte >= 32 && rx_byte <= 126) || rx_byte == 8'h0A || rx_byte == 8'h0D || rx_byte == 8'h09) begin
+                            $write("%c", rx_byte);
+                            $fflush();
+                        end else begin
+                            // Print hex representation if non-printable byte received
+                            $write("[%02x]", rx_byte);
+                            $fflush();
+                        end
                         state <= IDLE;
                     end
                 end

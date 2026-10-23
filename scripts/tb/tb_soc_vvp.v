@@ -52,8 +52,9 @@ module tb_soc_vvp;
     );
 
     // Instantiate UART Receiver to print characters to terminal
+    // Default 19200 Baud @ 50MHz is 2608 clocks per bit (16 * 163 = 2608)
     uart_rx_monitor #(
-        .CLKS_PER_BIT(1312)
+        .CLKS_PER_BIT(2608)
     ) uart_mon (
         .clk(clk),
         .rst_n(rst_n),

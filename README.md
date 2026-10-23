@@ -1,132 +1,71 @@
 # Shakti E-Class & RISC-V Development Codespace
 
-This repository provides an automated, browser-based **GitHub Codespaces** development environment for Shakti RISC-V E-Class processor design and software development.
+This repository provides an automated, high-performance **GitHub Codespaces** development environment for Shakti RISC-V E-Class processor design, simulation, and software development.
 
 ---
 
-## 🛠️ Included Tools & Environment
+## ⚡ Simulation Options: Fast-Track vs Full SoC
+
+### Option 1: Fast Minimized Shakti SoC (Recommended — 1-2 Seconds!)
+Boots an authentic **IIT Madras Shakti E-Class (RV32IAC)** core in Icarus Verilog (`iverilog` + `vvp`) and prints the full **ASCII Shakti Flame Logo** directly to your terminal in under 2 seconds:
+
+```bash
+./scripts/run_fast_shakti.sh
+```
+
+**Why it's so fast:**
+- **Trimmed Core (RV32IAC):** 3-stage pipelined Shakti E-Class without bloated peripheral overhead or missing multiplier primitives.
+- **Direct-Bus UART Sniffer:** Testbench sniffs CPU writes to the UART data register directly, outputting characters in 1 clock cycle instead of waiting thousands of cycles for serial bit-shifting (eliminates baud drift and garbage characters).
+- **Embedded Flame Logo Bootloader:** Located under `minimized_soc/firmware/main.c`, targeting BRAM memory directly.
+
+---
+
+### Option 2: Full SP2020 / Pinaka SoC Simulation (Bluespec + Full mkSoc)
+Runs the complete `sp2020/e32-a35` SoC with AXI interconnect, caches, and peripherals:
+
+```bash
+./scripts/run_vvp.sh
+```
+
+*(You can also override baud sampling at runtime if needed, e.g., `vvp sim_vvp/shakti_soc.vvp +CLKS_PER_BIT=2608`)*
+
+---
+
+### Option 3: Spike RISC-V ISA Simulator
+Run your RISC-V ELF directly in the Spike simulator:
+
+```bash
+./scripts/run_spike.sh
+```
+
+---
+
+## 🛠 Included Tools & Environment
 
 The container comes pre-configured with:
-- **RISC-V Toolchains:** `riscv32-unknown-elf-gcc`, `riscv64-unknown-elf-gcc`, `ar`, `objdump`, `objcopy` (with multilib RV32/RV64 support).
+- **RISC-V Toolchain:** Prebuilt SiFive multilib `riscv64-unknown-elf-gcc` / `riscv32-unknown-elf-gcc` with full Newlib C library support.
 - **Simulators:** 
   - `spike` (RISC-V ISA simulator)
   - `pk` (RISC-V 32-bit proxy kernel)
-  - `iverilog` (Icarus Verilog)
+  - `iverilog` & `vvp` (Icarus Verilog)
   - `verilator`
-- **Bluespec Compiler:** BSC 2024.07 (`BLUESPECDIR=/usr/local/lib`, with `Prelude` symlinks and `BlueNoC` path fixes).
+- **Bluespec Compiler:** BSC 2024.07 (`BLUESPECDIR=/usr/local/lib`).
 - **Hardware Debug & Utility:** `openocd`, `gdb-multiarch`, `gtkwave`.
 - **Python EDA tools:** `pyserial`, `miniterm`.
 - **Shakti Repositories (Editable in Workspace):**
+  - `minimized_soc/`: Fast-booting trimmed Shakti E-Class SoC with authentic Flame Logo.
   - `shakti-e-class`: [https://github.com/anmolsahoo25/shakti-e-class](https://github.com/anmolsahoo25/shakti-e-class)
   - `shakti-sdk`: [https://gitlab.com/shaktiproject/software/shakti-sdk.git](https://gitlab.com/shaktiproject/software/shakti-sdk.git)
-  - `sp2020` / `e32-a35` (Pinaka SoC for Arty A7-35T): [https://gitlab.com/shaktiproject/sp2020/-/tree/master/e32-a35](https://gitlab.com/shaktiproject/sp2020/-/tree/master/e32-a35)
+  - `sp2020/e32-a35`: [https://gitlab.com/shaktiproject/sp2020/-/tree/master/e32-a35](https://gitlab.com/shaktiproject/sp2020/-/tree/master/e32-a35)
 
 ---
 
-## 🚀 How to Put This on GitHub and Launch Codespace
+## 🚀 How to Launch in GitHub Codespaces
 
-### Step 1: Create a New GitHub Repository
-1. Go to [github.com/new](https://github.com/new).
-2. Enter a repository name (for example, `shakti-riscv-codespace`).
-3. Choose **Public** (or Private) and leave initialize with README unchecked.
-4. Click **Create repository**.
-
-### Step 2: Push This Folder to GitHub
-Run the following commands in your local terminal:
-
-```bash
-cd "e:\making an codespace"
-git init -b main
-git add .
-git commit -m "feat: complete Shakti E-Class & RISC-V codespace devcontainer"
-git remote add origin https://github.com/<YOUR_GITHUB_USERNAME>/<YOUR_REPO_NAME>.git
-git push -u origin main
-```
-
-*(Replace `<YOUR_GITHUB_USERNAME>` and `<YOUR_REPO_NAME>` with your actual repository information).*
-
-### Step 3: Launch in GitHub Codespaces
-1. Open your repository on GitHub.
-2. Click the green **Code** button.
-3. Switch to the **Codespaces** tab.
-4. Click **Create codespace on main**.
-
-GitHub will automatically build the container and initialize the environment.
-
----
-
-## 💻 Workflow & Commands Inside the Codespace
-
-Once your Codespace opens in VS Code:
-
-### 1. Verify Tool Installations
-Run the diagnostic script:
-```bash
-./scripts/verify_tools.sh
-```
-
-### 2. Generate Shakti E-Class Verilog
-You can use the helper script:
-```bash
-./scripts/generate_verilog.sh
-```
-
-Or run the manual steps:
-```bash
-cd shakti-e-class/base-sim
-./manager.sh update_deps
-make CONFIG=soc_config.inc generate_verilog
-```
-The generated Verilog files will appear in `shakti-e-class/base-sim/verilog/`.
-
-### 3. Editing Code & Working with E32-A35 (Pinaka SoC)
-All files under `shakti-e-class/`, `shakti-sdk/`, and `sp2020/e32-a35/` (also symlinked as `./e32-a35` in the root) are directly mounted in the workspace:
-- `shakti-e-class/`: Bluespec BSV source code, base simulation environment, and SoC generation.
-- `shakti-sdk/`: Baremetal firmware, drivers, and libraries.
-- `sp2020/e32-a35/`: Arty A7-35T board files, OpenOCD debug configuration (`ftdi.cfg`), board bitstreams, and sample applications.
-
-You can edit any `.bsv`, `.v`, or `.c` files directly in VS Code, commit your changes, and push them to your git remote:
-```bash
-git status
-git add .
-git commit -m "Updated Shakti core and e32-a35 modifications"
-git push
-```
-
----
-
-## ⚙️ Applied Fixes Summary
-The container automatically applies the following fixes upon creation:
-1. **GHC Stack Integer Overflow:** Patched `-K40000M` to `-K4000M` in `shakti-e-class/base-sim/Makefile`.
-2. **Obsolete Filter:** Stripped `-verilog-filter` from the Bluespec compile line.
-3. **Library Paths:** Configured `/usr/local/lib/Prelude` and `/usr/local/lib/Libraries/BlueNoC` for modern BSC 2024.07 compatibility.
-4. **Toolchain Symlinks:** Linked 64-bit multi-lib RISC-V GCC to `riscv32-unknown-elf-*` and generic `riscv-unknown-elf-*`.
-
-# 1. Download and install prebuilt SiFive Toolchain into /opt/riscv
-cd /tmp
-wget -q https://static.dev.sifive.com/dev-tools/riscv64-unknown-elf-gcc-8.3.0-2019.08.0-x86_64-linux-ubuntu14.tar.gz
-sudo rm -rf /opt/riscv
-sudo tar -xzf riscv64-unknown-elf-gcc-8.3.0-2019.08.0-x86_64-linux-ubuntu14.tar.gz -C /opt
-sudo mv /opt/riscv64-unknown-elf-gcc-8.3.0-2019.08.0-x86_64-linux-ubuntu14 /opt/riscv
-rm -f riscv64-unknown-elf-gcc-8.3.0-2019.08.0-x86_64-linux-ubuntu14.tar.gz
-
-# 2. Symlink to /usr/local/bin (so riscv32-, riscv64-, and riscv- all work)
-for tool in gcc g++ ar as ld nm objcopy objdump ranlib size strings strip; do
-    sudo ln -sf /opt/riscv/bin/riscv64-unknown-elf-$tool /usr/local/bin/riscv64-unknown-elf-$tool
-    sudo ln -sf /opt/riscv/bin/riscv64-unknown-elf-$tool /usr/local/bin/riscv32-unknown-elf-$tool
-    sudo ln -sf /opt/riscv/bin/riscv64-unknown-elf-$tool /usr/local/bin/riscv-unknown-elf-$tool
-done
-
-# 3. Build pk pinned to v1.0.0 (builds cleanly in 15 seconds!)
-cd /tmp
-sudo rm -rf riscv-pk
-git clone https://github.com/riscv-software-src/riscv-pk.git
-cd riscv-pk
-git checkout v1.0.0
-mkdir -p build && cd build
-PATH="/opt/riscv/bin:$PATH" CC=/opt/riscv/bin/riscv64-unknown-elf-gcc ../configure --prefix=/opt/riscv --host=riscv64-unknown-elf
-PATH="/opt/riscv/bin:$PATH" make -j$(nproc)
-sudo make install
-sudo ln -sf /opt/riscv/riscv64-unknown-elf/bin/pk /usr/local/bin/pk
-sudo ln -sf /opt/riscv/riscv64-unknown-elf/bin/pk /usr/local/bin/pk32 2>/dev/null || true
-cd /tmp && sudo rm -rf riscv-pk
+1. Push this repository to GitHub.
+2. Open your repository on GitHub.
+3. Click **Code** -> **Codespaces** -> **Create codespace on main**.
+4. Once loaded, open a terminal in VS Code and run:
+   ```bash
+   ./scripts/run_fast_shakti.sh
+   ```
