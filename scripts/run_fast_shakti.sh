@@ -16,11 +16,8 @@ echo "=========================================================="
 
 cd "${MINI_DIR}"
 
-# Ensure firmware is compiled
-if [ ! -f "rtl/firmware.hex" ] || [ ! -f "firmware.hex" ]; then
-    echo "==> Building firmware with Shakti Flame Logo..."
-    make -C firmware
-fi
+# Build firmware to incorporate any changes to main.c
+make -C firmware -s
 
 # Ensure executable permissions
 chmod +x run_test.sh

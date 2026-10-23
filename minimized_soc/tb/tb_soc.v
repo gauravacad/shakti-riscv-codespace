@@ -40,25 +40,15 @@ module tb_soc;
             has_printed    <= 1'b1;
         end
 
-        // Auto-finish as soon as the complete logo & prompt are printed and UART goes idle
+        // Auto-finish cleanly as soon as the complete logo is printed and UART goes idle
         if (has_printed && (($time - last_char_time) > 200_000)) begin
-            $display("\n============================================================");
-            $display(" Simulation SUCCESS: Full Shakti Flame Logo Printed Cleanly! ");
-            $display("============================================================");
             $finish;
         end
     end
 
     initial begin
-        $display("============================================================");
-        $display(" Simulation: Shakti E-Class with Flame Boot Logo Running... ");
-        $display("============================================================\n");
-
         // Safety watchdog (100 ms limit)
         #100_000_000;
-        $display("\n============================================================");
-        $display(" Simulation Watchdog: Max time reached. Finishing.          ");
-        $display("============================================================");
         $finish;
     end
 
