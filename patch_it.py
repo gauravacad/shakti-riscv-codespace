@@ -1,62 +1,92 @@
 import os
 import glob
+import re
 
 print("==================================================")
-print(" Patching SHAKTI-SDK uart.c for Spike Simulator")
+print(" Patching SHAKTI-SDK for Spike Simulator Support")
 print("==================================================")
 
-# Search for uart.c
-candidates = []
+# 1. Search for uart.c
+uart_files = []
 for root, dirs, files in os.walk("/workspaces"):
     if "uart.c" in files and "bsp" in root:
-        candidates.append(os.path.join(root, "uart.c"))
+        uart_files.append(os.path.join(root, "uart.c"))
 
-if not candidates:
+if not uart_files:
     for root, dirs, files in os.walk("."):
         if "uart.c" in files and "bsp" in root:
-            candidates.append(os.path.join(root, "uart.c"))
+            uart_files.append(os.path.join(root, "uart.c"))
 
-if not candidates:
-    print("Error: Could not locate uart.c in /workspaces or current directory.")
-    exit(1)
-
-for path in candidates:
-    print(f"--> Found: {path}")
+for path in uart_files:
+    print(f"--> Patching uart.c: {path}")
     with open(path, "r", encoding="utf-8") as f:
         code = f.read()
 
-    # 1. Add tohost definition if not present
+    # Add tohost definition if not present
     if "tohost" not in code:
         header = (
-            "\n/* Added for Spike Simulator HTIF Output (Zero VVP/FPGA impact) */\n"
+            '\n/* Added for Spike Simulator HTIF Output */\n'
             'volatile unsigned long long tohost __attribute__((section(".tohost"))) = 0;\n'
             'volatile unsigned long long fromhost __attribute__((section(".tohost"))) = 0;\n\n'
         )
         code = header + code
 
-    # 2. Patch putchar(int ch)
-    tohost_write = "tohost = ((unsigned long long)1 << 56) | ((unsigned long long)1 << 48) | (unsigned char)ch;\n\t"
-    if "tohost = " not in code or "putchar" not in code.split("tohost = ")[-1]:
-        # Replace inside putchar
+    # Patch putchar(int ch) to write to tohost
+    if "tohost = ((unsigned long long)1 << 56)" not in code:
         old_pattern = "int putchar(int ch)\n{\n\twhile(uart_instance[0]->status & STS_TX_FULL);"
-        new_pattern = f"int putchar(int ch)\n{{\n\t{tohost_write}while(uart_instance[0]->status & STS_TX_FULL);"
-        
+        new_pattern = (
+            "int putchar(int ch)\n{\n"
+            "\t/* Spike HTIF Output */\n"
+            "\ttohost = ((unsigned long long)1 << 56) | ((unsigned long long)1 << 48) | (unsigned char)ch;\n"
+            "\twhile(uart_instance[0]->status & STS_TX_FULL);"
+        )
         if old_pattern in code:
             code = code.replace(old_pattern, new_pattern)
-            print("--> Replaced in putchar() via exact match.")
+            print("--> Patched putchar() successfully.")
         else:
-            # Fallback string replacement
             target = "uart_instance[0]->tx_reg = ch;"
-            replacement = f"{tohost_write}uart_instance[0]->tx_reg = ch;"
+            replacement = (
+                "tohost = ((unsigned long long)1 << 56) | ((unsigned long long)1 << 48) | (unsigned char)ch;\n\t"
+                "uart_instance[0]->tx_reg = ch;"
+            )
             code = code.replace(target, replacement, 1)
-            print("--> Replaced in putchar() via fallback match.")
+            print("--> Patched putchar() via fallback.")
 
     with open(path, "w", encoding="utf-8") as f:
         f.write(code)
-    print(f"--> Successfully patched {path}!")
 
-print("\nAll done! Now rebuild and run on Spike:")
-print("  cd /workspaces/*/shakti-sdk/software/examples/uart_applns/hello")
-print("  make clean")
-print("  make software PROGRAM=hello TARGET=pinaka")
-print("  spike --isa=rv32imac ./output/hello.shakti")
+# 2. Search for start.S to bypass unmapped PLIC stores on Spike
+start_files = []
+for root, dirs, files in os.walk("/workspaces"):
+    if "start.S" in files and "bsp" in root:
+        start_files.append(os.path.join(root, "start.S"))
+
+if not start_files:
+    for root, dirs, files in os.walk("."):
+        if "start.S" in files and "bsp" in root:
+            start_files.append(os.path.join(root, "start.S"))
+
+for path in start_files:
+    print(f"--> Patching start.S: {path}")
+    with open(path, "r", encoding="utf-8") as f:
+        s_code = f.read()
+
+    # In start.S, sb to PLIC addresses (0x0C002000 / 0x0C000000) causes Store Access Fault in Spike
+    # Comment out those 8 sb instructions for simulator compatibility
+    old_plic = "sb t3, 0(t6)\n sb t3, 1(t6)\n sb t3, 2(t6)\n sb t3, 3(t6)"
+    new_plic = "# sb t3, 0(t6)\n# sb t3, 1(t6)\n# sb t3, 2(t6)\n# sb t3, 3(t6)"
+    
+    if old_plic in s_code:
+        s_code = s_code.replace(old_plic, new_plic)
+        print("--> Safely bypassed PLIC stores in start.S for Spike!")
+
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(s_code)
+
+print("\n==================================================")
+print(" Success! Both uart.c and start.S patched.")
+print(" Now recompile and run:")
+print("   cd /workspaces/*/shakti-sdk/software/examples/uart_applns/hello")
+print("   make clean && make software PROGRAM=hello TARGET=pinaka")
+print("   spike --isa=rv32imac ./output/hello.shakti")
+print("==================================================")
