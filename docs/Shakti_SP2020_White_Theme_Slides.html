@@ -359,26 +359,29 @@ No content to boot
           How to configure Shakti E-Class to compile as a <strong>pure minimal Base ISA (RV32I)</strong> core. This completely eliminates the hardware multiplier (<code class="text-rose-600 font-mono">mkmuldiv.v</code>) and cuts FPGA core area by ~60%!
         </p>
 
-        <!-- Configuration Grid -->
+        <!-- Configuration Comparison Grid -->
         <div class="grid grid-cols-2 gap-3 mb-3 text-xs">
           <div class="p-3 bg-slate-900 rounded-xl font-mono text-[11px] text-slate-200 border border-slate-800">
-            <span class="text-amber-400 font-bold block mb-1">📝 In `core_config.inc`:</span>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-amber-400 font-bold">📝 Lines Changed in `core_config.inc`:</span>
+              <span class="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-slate-400">Diff</span>
+            </div>
             <div class="space-y-0.5 text-slate-300">
-              <div>ISA=<span class="text-emerald-400 font-bold">RV32I</span></div>
-              <div>MUL=<span class="text-rose-400 font-bold">disable</span></div>
-              <div>DIV=<span class="text-rose-400 font-bold">disable</span></div>
-              <div>ATOMIC=<span class="text-rose-400 font-bold">disable</span></div>
-              <div>COMPRESSED=<span class="text-rose-400 font-bold">disable</span></div>
-              <div>USER=<span class="text-rose-400 font-bold">disable</span></div>
-              <div>MULSTAGES=0</div>
+              <div><span class="text-red-400">- ISA=RV32</span> &rarr; <span class="text-emerald-400 font-bold">+ ISA=RV32I</span></div>
+              <div><span class="text-red-400">- MUL=enable</span> &rarr; <span class="text-emerald-400 font-bold">+ MUL=disable</span></div>
+              <div><span class="text-red-400">- DIV=enable</span> &rarr; <span class="text-emerald-400 font-bold">+ DIV=disable</span></div>
+              <div><span class="text-red-400">- ATOMIC=enable</span> &rarr; <span class="text-emerald-400 font-bold">+ ATOMIC=disable</span></div>
+              <div><span class="text-red-400">- COMPRESSED=enable</span> &rarr; <span class="text-emerald-400 font-bold">+ COMPRESSED=disable</span></div>
+              <div><span class="text-red-400">- USER=enable</span> &rarr; <span class="text-emerald-400 font-bold">+ USER=disable</span></div>
+              <div><span class="text-red-400">- MULSTAGES=4</span> &rarr; <span class="text-emerald-400 font-bold">+ MULSTAGES=0</span></div>
             </div>
           </div>
           <div class="p-3 bg-violet-50 border border-violet-200 rounded-xl space-y-2 text-slate-700">
-            <span class="font-bold text-violet-900 block">✨ Benefits of Base RV32I Core:</span>
+            <span class="font-bold text-violet-900 block">⚡ Pipeline Stages & Benefits:</span>
             <ul class="space-y-1 text-[11px] text-slate-600 list-disc pl-4">
+              <li><strong class="text-slate-900">Can we add stages?</strong> Shakti E-Class has a fixed <strong>3-stage pipeline</strong> (Fetch &rarr; Execute &rarr; Writeback). For execution units, <code class="text-slate-800 font-mono">MULSTAGES</code> configures multiplier latency (0, 1, 2, or 4 stages).</li>
               <li><strong class="text-slate-900">Zero DSP/Multiplier:</strong> Completely removes <code class="text-slate-800 font-mono">mkmuldiv.v</code> & <code class="text-slate-800 font-mono">multiplier.v</code>.</li>
               <li><strong class="text-slate-900">~60% Smaller Area:</strong> Fits on tiny low-cost FPGAs easily.</li>
-              <li><strong class="text-slate-900">Faster Build Time:</strong> BSC compiles in half the time.</li>
             </ul>
           </div>
         </div>

@@ -147,7 +147,26 @@ No content to boot
 ### Step 9: Compile Pure Base ISA Core (RV32I Minimal Configuration)
 To strip the processor down to a minimal **Base RV32I core** (removing M, A, C extensions and cutting core area by ~60%):
 
-1. **Edit `core_config.inc` (or copy `final_touch/core_config_base_rv32i.inc`):**
+#### 1. What Lines are Changed in `core_config.inc`:
+| Line / Parameter | Original SP2020 (`RV32IMAC`) | Changed Base Core (`RV32I`) | Impact |
+| :--- | :--- | :--- | :--- |
+| `ISA` | `RV32` | `RV32I` | Strips M, A, C instruction decoders |
+| `MUL` | `enable` | `disable` | Completely eliminates hardware multiplier |
+| `DIV` | `enable` | `disable` | Completely eliminates hardware divider |
+| `ATOMIC` | `enable` | `disable` | Removes LR/SC and AMO memory logic |
+| `COMPRESSED` | `enable` | `disable` | Standard 32-bit instructions only |
+| `USER` | `enable` | `disable` | Machine-mode (M-mode) only |
+| `MULSTAGES` | `4` | `0` | Multiplier latency (0 = disabled, 1/2/4 for stages) |
+| `DIVSTAGES` | `32` | `0` | Multi-cycle divider stages |
+
+#### 2. Can We Add Stages Here?
+* **Execution Unit Stages (`MULSTAGES` / `DIVSTAGES`):** **YES.** You can configure the latency/pipelining of functional units:
+  * `MULSTAGES=0`: Disabled (Base RV32I).
+  * `MULSTAGES=1`: Single-cycle combinatorial multiplier.
+  * `MULSTAGES=2` or `MULSTAGES=4`: 2 or 4-stage pipelined multiplier (higher clock speed). When set to `4`, your testbench/simulation must use a 4-stage pipelined multiplier model (`multiplier.v`).
+* **Core Pipeline Stages (Fetch &rarr; Execute &rarr; Writeback):** Shakti E-Class has an in-order **3-stage microarchitecture** written in Bluespec SystemVerilog (BSV). You cannot convert the 3-stage core into a 5-stage core via `core_config.inc` alone because the pipeline stages are hard-coded in the BSV stage rules. (For 5-stage or out-of-order 6-stage designs, Shakti provides the **C-Class** and **I-Class** cores).
+
+#### 3. Pure Base ISA `core_config.inc`:
 ```makefile
 ISA=RV32I
 MUL=disable
