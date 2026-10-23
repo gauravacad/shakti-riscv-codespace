@@ -31,7 +31,7 @@
       </div>
       <div class="flex items-center space-x-3">
         <span id="slideCounter" class="text-xs font-mono font-bold px-3 py-1 bg-white text-indigo-700 border border-slate-200 rounded-full shadow-xs">
-          Step 1 of 8
+          Step 1 of 9
         </span>
       </div>
     </div>
@@ -348,6 +348,50 @@ No content to boot
         </div>
       </div>
 
+      <!-- ==================== SLIDE 9 ==================== -->
+      <div class="slide" data-index="9">
+        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-violet-50 border border-violet-200 text-violet-700 text-xs font-bold uppercase tracking-wider mb-2">
+          <span class="w-2 h-2 rounded-full bg-violet-600"></span>
+          <span>Step 9: Compile Pure Base ISA Core (RV32I)</span>
+        </div>
+        <h2 class="text-2xl font-extrabold text-slate-900 mb-2">Strip M/A/C Extensions in `core_config.inc`</h2>
+        <p class="text-slate-600 text-xs mb-3 leading-relaxed">
+          How to configure Shakti E-Class to compile as a <strong>pure minimal Base ISA (RV32I)</strong> core. This completely eliminates the hardware multiplier (<code class="text-rose-600 font-mono">mkmuldiv.v</code>) and cuts FPGA core area by ~60%!
+        </p>
+
+        <!-- Configuration Grid -->
+        <div class="grid grid-cols-2 gap-3 mb-3 text-xs">
+          <div class="p-3 bg-slate-900 rounded-xl font-mono text-[11px] text-slate-200 border border-slate-800">
+            <span class="text-amber-400 font-bold block mb-1">📝 In `core_config.inc`:</span>
+            <div class="space-y-0.5 text-slate-300">
+              <div>ISA=<span class="text-emerald-400 font-bold">RV32I</span></div>
+              <div>MUL=<span class="text-rose-400 font-bold">disable</span></div>
+              <div>DIV=<span class="text-rose-400 font-bold">disable</span></div>
+              <div>ATOMIC=<span class="text-rose-400 font-bold">disable</span></div>
+              <div>COMPRESSED=<span class="text-rose-400 font-bold">disable</span></div>
+              <div>USER=<span class="text-rose-400 font-bold">disable</span></div>
+              <div>MULSTAGES=0</div>
+            </div>
+          </div>
+          <div class="p-3 bg-violet-50 border border-violet-200 rounded-xl space-y-2 text-slate-700">
+            <span class="font-bold text-violet-900 block">✨ Benefits of Base RV32I Core:</span>
+            <ul class="space-y-1 text-[11px] text-slate-600 list-disc pl-4">
+              <li><strong class="text-slate-900">Zero DSP/Multiplier:</strong> Completely removes <code class="text-slate-800 font-mono">mkmuldiv.v</code> & <code class="text-slate-800 font-mono">multiplier.v</code>.</li>
+              <li><strong class="text-slate-900">~60% Smaller Area:</strong> Fits on tiny low-cost FPGAs easily.</li>
+              <li><strong class="text-slate-900">Faster Build Time:</strong> BSC compiles in half the time.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Terminal Box -->
+        <div class="bg-slate-900 rounded-xl overflow-hidden shadow-md p-3 font-mono text-[11px] text-slate-200">
+          <span class="text-slate-500"># 1. Regenerate Verilog for pure Base RV32I:</span><br>
+          <span class="text-cyan-400 font-semibold">make clean && make generate_verilog CONFIG=core_config.inc</span><br>
+          <span class="text-slate-500 mt-2 block"># 2. Compile software with pure Base ISA flags:</span>
+          <span class="text-emerald-400 font-semibold">riscv64-unknown-elf-gcc -march=rv32i -mabi=ilp32 ...</span>
+        </div>
+      </div>
+
     </div>
 
     <!-- Bottom Navigation Bar -->
@@ -371,7 +415,7 @@ No content to boot
   <!-- Interactive Slide Engine Script -->
   <script>
     let currentSlide = 1;
-    const totalSlides = 8;
+    const totalSlides = 9;
 
     function renderDots() {
       const container = document.getElementById('dotsContainer');

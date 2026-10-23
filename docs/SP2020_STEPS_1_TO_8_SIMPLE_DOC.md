@@ -141,3 +141,32 @@ Shakti booted
  id ffff 
 No content to boot
 ```
+
+---
+
+### Step 9: Compile Pure Base ISA Core (RV32I Minimal Configuration)
+To strip the processor down to a minimal **Base RV32I core** (removing M, A, C extensions and cutting core area by ~60%):
+
+1. **Edit `core_config.inc` (or copy `final_touch/core_config_base_rv32i.inc`):**
+```makefile
+ISA=RV32I
+MUL=disable
+DIV=disable
+ATOMIC=disable
+COMPRESSED=disable
+USER=disable
+MULSTAGES=0
+DIVSTAGES=0
+```
+
+2. **Regenerate Verilog from Bluespec:**
+```bash
+make clean
+make generate_verilog CONFIG=core_config.inc
+```
+*(Notice: `mkmuldiv.v` is no longer generated! Zero DSP slices or multiplier models needed).*
+
+3. **Compile Software with Base ISA Flags:**
+```bash
+riscv64-unknown-elf-gcc -march=rv32i -mabi=ilp32 -O2 boot.c -o boot.elf
+```

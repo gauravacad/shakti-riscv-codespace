@@ -7,9 +7,12 @@ This all-in-one folder contains the essential scripts, Verilog models, testbench
 ## 📂 Contents Overview
 
 ### 1. Documentation & Visual Presentations
-* **`SP2020_STEPS_1_TO_8_SIMPLE_DOC.md`**: Clean, direct step-by-step document (Steps 1 to 8) with copy-paste commands.
-* **`Shakti_SP2020_White_Theme_Slides.html`**: Interactive, colourful, white-background presentation slide deck (Steps 1 to 8).
+* **`SP2020_STEPS_1_TO_8_SIMPLE_DOC.md`**: Clean, direct step-by-step document (Steps 1 to 9) with copy-paste commands.
+* **`Shakti_SP2020_White_Theme_Slides.html`**: Interactive, colourful, white-background presentation slide deck (Steps 1 to 9).
 * **`UART_vs_HTIF_Slides.md`**: Comprehensive 2-slide architectural comparison of Physical UART vs. HTIF (`tohost`).
+
+### 2. Base ISA Configuration (Pure RV32I)
+* **`core_config_base_rv32i.inc`**: Minimal BSC core configuration defining pure `RV32I` (M/A/C extensions disabled, eliminating `mkmuldiv.v`).
 
 ### 2. Fast-Baud SP2020 Simulation (81.5x Accelerated)
 * **`run_baud_fix.sh`**: Master simulation script using the 32-clock simulation baud trick (streams output in 3–5 seconds).
