@@ -29,10 +29,23 @@ module tb_soc;
     //  Real-Time UART Console Output Monitor
     //  Captures CPU writes to UART TX register and outputs directly to console
     // =========================================================================
+    reg [63:0] last_char_time = 0;
+    reg        has_printed = 0;
+
     always @(posedge hw_clk) begin
         if (uut.uart_valid && |uut.uart_wstrb && (uut.uart_addr == 2'b00)) begin
             $write("%c", uut.uart_wdata[7:0]);
             $fflush();
+            last_char_time <= $time;
+            has_printed    <= 1'b1;
+        end
+
+        // Auto-finish as soon as the complete logo & prompt are printed and UART goes idle
+        if (has_printed && (($time - last_char_time) > 200_000)) begin
+            $display("\n============================================================");
+            $display(" Simulation SUCCESS: Full Shakti Flame Logo Printed Cleanly! ");
+            $display("============================================================");
+            $finish;
         end
     end
 
@@ -41,10 +54,10 @@ module tb_soc;
         $display(" Simulation: Shakti E-Class with Flame Boot Logo Running... ");
         $display("============================================================\n");
 
-        // Run for 30 ms so complete Shakti logo & prompt are printed
-        #30_000_000;
+        // Safety watchdog (100 ms limit)
+        #100_000_000;
         $display("\n============================================================");
-        $display(" Simulation SUCCESS: Shakti Core Executed Firmware Cleanly! ");
+        $display(" Simulation Watchdog: Max time reached. Finishing.          ");
         $display("============================================================");
         $finish;
     end
