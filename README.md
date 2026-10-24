@@ -64,4 +64,5 @@ The container comes pre-configured with:
 1. Prof. Kamakoti sir. Rise labs TEAM IITM
 2. Mr. Kunal Gosh and Vsd team
 3. CSIR CEERI LAB.
+4. Bala and lakshaya (ps students)
 
