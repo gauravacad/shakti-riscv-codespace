@@ -59,7 +59,12 @@ The container comes pre-configured with:
 ---
 
 ## 🚀 How to Launch in GitHub Codespaces
-
+go to a new terminal after launch with current workspace path as shown before $sign and run the vvp file. 
+'''
+.../shakti-riscv-codespace/sp2020/e32-a35/sim_baud_fix (master) $ ./shakti_soc.vvp 
+'''
+you will see boot logo in next 3-4 minutes.
+Thanks for using the codespace.
 ## Acknowledge
 1. Prof. Kamakoti sir. Rise labs TEAM IITM
 2. Mr. Kunal Gosh and Vsd team
