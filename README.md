@@ -4,23 +4,10 @@ This repository provides an automated, high-performance **GitHub Codespaces** de
 
 ---
 
-## ⚡ Simulation Options: Fast-Track vs Full SoC
-
-### Option 1: Fast Minimized Shakti SoC (Recommended — 1-2 Seconds!)
-Boots an authentic **IIT Madras Shakti E-Class (RV32IAC)** core in Icarus Verilog (`iverilog` + `vvp`) and prints the full **ASCII Shakti Flame Logo** directly to your terminal in under 2 seconds:
-
-```bash
-./scripts/run_fast_shakti.sh
-```
-
-**Why it's so fast:**
-- **Trimmed Core (RV32IAC):** 3-stage pipelined Shakti E-Class without bloated peripheral overhead or missing multiplier primitives.
-- **Direct-Bus UART Sniffer:** Testbench sniffs CPU writes to the UART data register directly, outputting characters in 1 clock cycle instead of waiting thousands of cycles for serial bit-shifting (eliminates baud drift and garbage characters).
-- **Embedded Flame Logo Bootloader:** Located under `minimized_soc/firmware/main.c`, targeting BRAM memory directly.
-
+## ⚡ Simulation Options
 ---
 
-### Option 2: Accelerated Pure SP2020 Simulation (`baud_fix` — 81.5x Faster!)
+### Option 1: Accelerated Pure SP2020 Simulation (`baud_fix` — 81.5x Faster!)
 Runs the pure **IIT Madras Pinaka SoC (`sp2020/e32-a35`)** with full Bluespec core and AXI bus, but uses the simulation baud trick (`divisor = 2`, $32\text{ cycles/bit}$ instead of $2,608$):
 
 ```bash
@@ -32,7 +19,7 @@ chmod +x ./baud_fix/run_baud_fix.sh
 
 ---
 
-### Option 3: Real-Time Physical Baud SP2020 Simulation (`script_2020_fix`)
+### Option 2: Real-Time Physical Baud SP2020 Simulation (`script_2020_fix`)
 Runs the pure Pinaka SoC at physical real-time 19,200 Baud ($2,608\text{ clocks/bit}$):
 
 ```bash
@@ -42,7 +29,7 @@ chmod +x ./script_2020_fix/run_sp2020.sh
 
 ---
 
-### Option 4: Spike RISC-V ISA Simulator
+### Option 3: Spike RISC-V ISA Simulator
 Run your RISC-V ELF directly in the Spike simulator:
 
 ```bash
@@ -73,10 +60,8 @@ The container comes pre-configured with:
 
 ## 🚀 How to Launch in GitHub Codespaces
 
-1. Push this repository to GitHub.
-2. Open your repository on GitHub.
-3. Click **Code** -> **Codespaces** -> **Create codespace on main**.
-4. Once loaded, open a terminal in VS Code and run:
-   ```bash
-   ./scripts/run_fast_shakti.sh
-   ```
+## Acknowledge
+1. Prof. Kamakoti sir. Rise labs TEAM IITM
+2. Mr. Kunal Gosh and Vsd team
+3. CSIR CEERI LAB.
+
